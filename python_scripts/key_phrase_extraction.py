@@ -1,15 +1,15 @@
 import pke
+import re
+import pandas as pd
 
 
 class KeyPhraseExtraction:
 
-    def __init__(self, document):
+    def __init__(self):
         self.extractor = pke.unsupervised.TopicRank()
-        self.document = document
-        self.key_phrases = self.generate_key_phrases()
 
-    def generate_key_phrases(self):
-        self.extractor.load_document(input=self.document, language='en')
+    def generate_key_phrases(self, document_text):
+        self.extractor.load_document(input=document_text, language='en')
 
         self.extractor.candidate_selection()
 
@@ -22,6 +22,18 @@ class KeyPhraseExtraction:
             key_phrase_candidates.append(candidate)
 
         return key_phrase_candidates
+
+    def pre_process(self, document_text):
+        new_doc_text = document_text.replace('\n', ' ').replace('\r', '')
+        new_doc_text = re.sub("[^a-zA-Z0-9 :\.]", "", new_doc_text)
+        return new_doc_text
+
+    def pre_process_and_save_key_phrases(self, csv_path):
+        df = pd.read_csv(csv_path)
+        df['pre_processed_text'] = [self.pre_process(x) for x in df['text']]
+        df['key_phrases'] = [self.generate_key_phrases(x) for x in df['pre_processed_text']]
+        return df
+
 
 # should be removed
 if __name__ == "__main__":
