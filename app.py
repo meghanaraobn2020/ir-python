@@ -2,6 +2,7 @@ from flask import Flask, render_template, make_response, jsonify
 from flask_cors import CORS
 from python_scripts.key_phrase_extraction import KeyPhraseExtraction
 from python_scripts.drmm import DRMM
+from python_scripts.relevance_feedback import RelevanceFeedback
 from flask import request
 
 app = Flask(__name__)
@@ -13,12 +14,6 @@ def hello_world():
     return render_template('index.html')
 
 
-@app.route("/docs")
-def get_docs_with_ranks():
-    doc_names = ['document_1', 'document_2', 'document_3']
-    return jsonify(doc_names)
-
-
 @app.route('/keyphrases', methods=['GET'])
 def get_key_phrases():
     document_list = request.args.get('document_list')
@@ -26,11 +21,19 @@ def get_key_phrases():
     return jsonify(doc_key_phrase_list)
 
 
-@app.route('/docranks', methods=['GET'])
-def get_most_relevant_docs():
+@app.route('/reldocs', methods=['GET'])
+def get_relevant_docs():
     query = request.args.get('query')
-    document_list = DRMM().get_relevant_documents(query)
-    return jsonify(document_list)
+    relevant_document_list = DRMM().get_relevant_documents(query)
+    return jsonify(relevant_document_list)
+
+
+@app.route('/userreldocs', methods=['GET'])
+def get_user_relevant_docs():
+    user_relevant_document_list = request.args.get('docslist')
+    user_relevant_document_list = user_relevant_document_list.split(",")
+    docs_key_phrases_list = RelevanceFeedback().get_user_relevant_document_list(user_relevant_document_list)
+    return jsonify(docs_key_phrases_list)
 
 
 if __name__ == '__main__':

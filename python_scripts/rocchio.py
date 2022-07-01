@@ -4,10 +4,11 @@ import numpy as np
 
 
 class Rocchio:
-    def __int__(self):
+    def __init__(self):
         print("Rocchio")
 
-    def rocchio_algorithm(self, query_doc_vector, docs_relevant_vectors, docs_irrelevant_vectors, alpha, beta):
+    @staticmethod
+    def rocchio_algorithm(query_doc_vector, docs_relevant_vectors, docs_irrelevant_vectors, alpha, beta):
         sum_of_rel_doc_vectors = []
         sum_of_irrel_doc_vectors = []
         for each_rel_doc_vector in docs_relevant_vectors:

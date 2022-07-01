@@ -1,11 +1,11 @@
 import pke
-import re
-import pandas as pd
+from python_scripts.document_preprocess import DocumentPreprocess
 
 
 class KeyPhraseExtraction:
 
     def __init__(self):
+        self.df = DocumentPreprocess().document_preprocess()
         self.extractor = pke.unsupervised.TopicRank()
 
     def generate_key_phrases(self, document_text):
@@ -23,16 +23,13 @@ class KeyPhraseExtraction:
 
         return key_phrase_candidates
 
-    def pre_process(self, document_text):
-        new_doc_text = document_text.replace('\n', ' ').replace('\r', '')
-        new_doc_text = re.sub("[^a-zA-Z0-9 :\.]", "", new_doc_text)
-        return new_doc_text
-
-    def pre_process_and_save_key_phrases(self, csv_path):
-        df = pd.read_csv(csv_path)
-        df['pre_processed_text'] = [self.pre_process(x) for x in df['text']]
-        df['key_phrases'] = [self.generate_key_phrases(x) for x in df['pre_processed_text']]
-        return df
+    def get_key_phrases_for_every_doc(self, user_relevant_document_list):
+        doc_key_phrases_list = []
+        for doc in user_relevant_document_list:
+            new_df = self.df.loc[self.df['doc_id'] == doc]
+            doc_key_phrases_list.append(self.generate_key_phrases(new_df['pre_processed_text'].tolist()[0]))
+        print('key_phrases:', doc_key_phrases_list)
+        return doc_key_phrases_list
 
 
 # should be removed
@@ -42,4 +39,4 @@ if __name__ == "__main__":
         process of ion exchange. Two inverse problems are investigated for this model, unique solve ability is proved, 
         and numerical solution methods are proposed. The efficiency of the proposed methods is demonstrated by a 
         numerical experiment.""".replace("\n", " ")
-    KeyPhraseExtraction(document)
+    KeyPhraseExtraction().get_key_phrases_for_every_doc(['FBIS3-1'])
